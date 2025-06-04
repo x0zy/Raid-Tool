@@ -1,4 +1,4 @@
 # Raid-Tool
-A tool foi feita pelo x0zy, não se esqueça de dar os devidos creditos, alem disso utilize VPN pois tem risco do discord bloquear sua API por ip
+Tool feita full gpt feita 3 meses atras. Usem VPN se não discord bloqueia o ip
 
-discord: theycallmex0zy_.
+discord: x0zy.py
